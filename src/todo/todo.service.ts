@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class TodoService {
+  constructor(private readonly prisma: PrismaService) {}
+
   create(createTodoDto: CreateTodoDto) {
     return 'This action adds a new todo';
   }
@@ -22,5 +25,8 @@ export class TodoService {
 
   remove(id: number) {
     return `This action removes a #${id} todo`;
+  }
+  test() {
+    return this.prisma.users.findMany();
   }
 }
