@@ -27,13 +27,16 @@ export class AuthService {
   }
 
   async login(email: string, password: string) {
-    const existEmail = this.userService.findUserByEmail(email);
+    const existEmail = await this.userService.findUserByEmail(email);
     if (!existEmail) {
       throw new ConflictException('Email not found');
     }
     const user = await this.userService.validateUser(email, password);
     if (user) {
       const payload = {
+        sub: user.id.toString(),
+        email: user.email,
+        username: user.username,
         user,
       };
       const token = this.jwtService.sign(payload);

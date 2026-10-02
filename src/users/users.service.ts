@@ -37,14 +37,9 @@ export class UsersService {
     }
     async validateUser(email: string, password: string) {
         const user = await this.findUserByEmail(email);
-        if (user && bcrypt.compare(password, user.password_hash)) {
-            const currentUser = await this.prisma.users.findUnique({
-                where: {
-                    email: email,
-                },
-            });
-            currentUser.password_hash = "";
-            return currentUser;
+        if (user && (await bcrypt.compare(password, user.password_hash))) {
+            const { password_hash, ...safeUser } = user;
+            return safeUser;
         }
         return false;
     }

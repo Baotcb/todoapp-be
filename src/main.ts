@@ -13,7 +13,11 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Todo API')
-    .setDescription('')
+    .setDescription('Tài liệu API hệ thống quản lý công việc (Todo App)')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'access-token',
+    )
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
@@ -24,7 +28,10 @@ async function bootstrap() {
       theme: 'bluePlanet',
     }),
   );
-
+  app.enableCors({
+    origin: 'http://localhost:3001',
+    credentials: true,
+  });
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
