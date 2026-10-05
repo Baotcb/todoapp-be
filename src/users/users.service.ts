@@ -64,4 +64,11 @@ export class UsersService {
             },
         });
     }
+
+    async linkMezonId(userId: bigint, mezonId: string) {
+        return this.prisma.users.update({
+            where: { id: userId },
+            data: { mezon_id: mezonId },
+        });
+    }
 }

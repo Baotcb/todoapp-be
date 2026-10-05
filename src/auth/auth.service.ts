@@ -86,17 +86,19 @@ export class AuthService {
         );
 
       if (existingEmail) {
-        throw new ConflictException(
-          'Email already belongs to another account',
-        );
-      }
 
-      user =
-        await this.userService.createMezonUser(
+        user = await this.userService.linkMezonId(
+          existingEmail.id,
+          mezonId,
+        );
+      } else {
+
+        user = await this.userService.createMezonUser(
           mezonId,
           username,
           email,
         );
+      }
     }
 
     const accessToken =
