@@ -7,10 +7,13 @@ import { TodoModule } from './todo/todo.module';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 
+import { RedisModule } from './redis/redis.module';
+
 @Module({
   controllers: [AppController],
   providers: [AppService],
   imports: [
+    RedisModule,
     AuthModule,
     TodoModule,
     ConfigModule.forRoot({ isGlobal: true }),

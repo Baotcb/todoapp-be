@@ -7,10 +7,16 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/LoginDto';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
+import { RedisService } from 'src/redis/redis.service';
+
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly configService: ConfigService, private readonly authService: AuthService) { }
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly authService: AuthService,
+    private readonly redisService: RedisService,
+  ) { }
 
   @Post('register')
   register(@Body() registerDto: RegisterDto) {
@@ -25,11 +31,11 @@ export class AuthController {
     return this.authService.login(loginDto.email, loginDto.password);
   }
 
-
-
   @Get('mezon')
-  loginWithMezon(@Res() response: Response) {
+  async loginWithMezon(@Res() response: Response) {
     const state = randomBytes(16).toString('hex').slice(0, 11);
+
+    await this.redisService.set(`mezon_oauth_state:${state}`, 'true', 5 * 60);
 
     const params = new URLSearchParams({
       client_id: this.configService.get<string>('MEZON_CLIENT_ID')!,
@@ -41,21 +47,15 @@ export class AuthController {
     const url =
       `https://oauth2.mezon.ai/oauth2/auth?${params.toString()}`;
 
-    response.cookie('mezon_oauth_state', state,
-      {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: false,
-        maxAge: 5 * 60 * 1000,
-      },
-    );
-
     return response.redirect(url);
   }
 
-
   @Get('mezon/callback')
-  async mezonCallBack(@Query('code') code: string, @Query('state') state: string, @Res() response: Response, @Req() request: any,) {
+  async mezonCallBack(
+    @Query('code') code: string,
+    @Query('state') state: string,
+    @Res() response: Response,
+  ) {
     console.log('MEZON CALLBACK');
     console.log('code:', code);
     console.log('state:', state);
@@ -64,18 +64,28 @@ export class AuthController {
         'Missing authorization code',
       );
     }
-    const savedState =
-      request.cookies?.mezon_oauth_state;
-
-    if (state !== savedState) {
-      throw new UnauthorizedException(
-        'Invalid OAuth state',
+    if (!state) {
+      throw new BadRequestException(
+        'Missing OAuth state',
       );
     }
+
+    const stateKey = `mezon_oauth_state:${state}`;
+    const savedState = await this.redisService.get(stateKey);
+
+    if (!savedState) {
+      throw new UnauthorizedException(
+        'Invalid or expired OAuth state',
+      );
+    }
+
+    await this.redisService.del(stateKey);
+
     const tokenData = await this.authService.exchangeMezonCode(code, state);
     const result = await this.authService.loginWithMezon(tokenData.id_token);
 
-    return response.redirect(`http://localhost:3001/login/mezon-callback?token=${encodeURIComponent(result.access_token)}`,);
+    return response.redirect(
+      `http://localhost:3001/login/mezon-callback?token=${encodeURIComponent(result.access_token)}`,
+    );
   }
-
 }
