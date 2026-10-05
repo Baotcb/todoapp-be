@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
+import * as cookieParser from 'cookie-parser';
 
 (BigInt.prototype as any).toJSON = function () {
   const int = Number.parseInt(this.toString());
@@ -28,6 +29,7 @@ async function bootstrap() {
       theme: 'bluePlanet',
     }),
   );
+  app.use(cookieParser());
   app.enableCors({
     origin: 'http://localhost:3001',
     credentials: true,
