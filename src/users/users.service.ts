@@ -43,4 +43,32 @@ export class UsersService {
         }
         return false;
     }
+    async findByMezonId(mezonId: string) {
+        return this.prisma.users.findUnique({
+            where: {
+                mezon_id: mezonId,
+            },
+        });
+    }
+    async createMezonUser(
+        mezonId: string,
+        username: string,
+        email: string,
+    ) {
+        return this.prisma.users.create({
+            data: {
+                mezon_id: mezonId,
+                username,
+                email,
+                password_hash: null,
+            },
+        });
+    }
+
+    async linkMezonId(userId: bigint, mezonId: string) {
+        return this.prisma.users.update({
+            where: { id: userId },
+            data: { mezon_id: mezonId },
+        });
+    }
 }
