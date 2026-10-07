@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
 import * as cookieParser from 'cookie-parser';
@@ -30,8 +31,10 @@ async function bootstrap() {
     }),
   );
   app.use(cookieParser());
+  const configService = app.get(ConfigService);
+  const clientUrl = configService.get<string>('ClientSettingsUrl');
   app.enableCors({
-    origin: 'http://localhost:3001',
+    origin: clientUrl,
     credentials: true,
   });
   await app.listen(process.env.PORT ?? 3000);
