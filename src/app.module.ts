@@ -6,7 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { TodoModule } from './todo/todo.module';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
-
+import { HealthModule } from './health/health.module';
 import { RedisModule } from './redis/redis.module';
 
 @Module({
@@ -19,6 +19,7 @@ import { RedisModule } from './redis/redis.module';
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     UsersModule,
+    HealthModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }
