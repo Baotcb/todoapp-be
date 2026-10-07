@@ -44,8 +44,8 @@ export class AuthController {
       scope: 'openid offline',
       state,
     });
-    const url =
-      `https://oauth2.mezon.ai/oauth2/auth?${params.toString()}`;
+    const mezonOauthUrl = this.configService.get<string>('MezonOauthUrl');
+    const url = `${mezonOauthUrl}/oauth2/auth?${params.toString()}`;
 
     return response.redirect(url);
   }
@@ -84,8 +84,9 @@ export class AuthController {
     const tokenData = await this.authService.exchangeMezonCode(code, state);
     const result = await this.authService.loginWithMezon(tokenData.id_token);
 
+    const clientUrl = this.configService.get<string>('ClientSettingsUrl');
     return response.redirect(
-      `http://localhost:3001/login/mezon-callback?token=${encodeURIComponent(result.access_token)}`,
+      `${clientUrl}/login/mezon-callback?token=${encodeURIComponent(result.access_token)}`,
     );
   }
 }
