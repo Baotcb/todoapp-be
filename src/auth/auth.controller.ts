@@ -8,9 +8,14 @@ import { LoginDto } from './dto/LoginDto';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { RedisService } from 'src/redis/redis.service';
+import { Public } from 'src/decorator/customize';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from './passport/jwt-auth.guard';
 
 @ApiTags('auth')
 @Controller('auth')
+@Public()
+@UseGuards(JwtAuthGuard)
 export class AuthController {
   constructor(
     private readonly configService: ConfigService,

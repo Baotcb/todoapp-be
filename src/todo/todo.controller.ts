@@ -19,11 +19,9 @@ import {
 import { TodoService } from './todo.service';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('todo')
 @ApiBearerAuth('access-token')
-@UseGuards(JwtAuthGuard)
 @Controller('todo')
 export class TodoController {
   private readonly logger = new Logger(TodoController.name);
